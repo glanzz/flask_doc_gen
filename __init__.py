@@ -1,13 +1,14 @@
 from typing import Any
+from .constants import OpenAPIContentTypes, OpenAPIDataTypes
 
 
 class DocGen:
     def get_response_schema(self, response):
         response_data = {}
         content_type = response.content_type
-        if content_type == "application/json":
+        if content_type == OpenAPIContentTypes.JSON.value:
             response_data = response.json
-        if content_type == "multipart/form-data":
+        if content_type == OpenAPIContentTypes.FORM.value:
             response_data = response.form
         return {
             (response.status_code): {
@@ -27,7 +28,7 @@ class DocGen:
     def _get_data_schema(self, value):
         value_type = self._get_type(value)
         schema = {"type": value_type}
-        if value_type == "object":
+        if value_type == OpenAPIDataTypes.object.name:
             schema["properties"] = {}
             for object_key in value:
                 schema["properties"][object_key] = self._get_data_schema(
@@ -43,13 +44,13 @@ class DocGen:
     def _get_type(self, data: Any) -> str:
         data_type = type(data)
         if data_type == int or data_type == float:
-            return "number"
+            return OpenAPIDataTypes.number.name
         if data_type == str:
-            return "string"
+            return OpenAPIDataTypes.string.name
         if data_type == dict:
-            return "object"
+            return OpenAPIDataTypes.object.name
         if data_type == list:
-            return "array"
+            return OpenAPIDataTypes.array.name
         if data_type == bool:
-            return "boolean"
+            return OpenAPIDataTypes.boolean.name
         return ""
