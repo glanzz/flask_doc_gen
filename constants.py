@@ -12,3 +12,9 @@ class OpenAPIDataTypes(Enum):
 class OpenAPIContentTypes(Enum):
     JSON = "application/json"
     FORM = "multipart/form-data"
+
+
+class ParameterType(Enum):
+    HEADERS = "header"
+    QUERY = "query"
+    PATH = "path"
