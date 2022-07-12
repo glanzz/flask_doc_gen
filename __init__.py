@@ -1,5 +1,5 @@
 from typing import Any
-from .constants import OpenAPIContentTypes, OpenAPIDataTypes
+from .constants import OpenAPIContentTypes, OpenAPIDataTypes, ParameterType
 
 
 class DocGen:
@@ -40,6 +40,31 @@ class DocGen:
                 schema["items"] = self._get_data_schema(value[0])
 
         return schema
+
+    def _get_parameter_object(self, name, value, param_type):
+        return {
+            "schema": self._get_data_schema(value),
+            "in": param_type,
+            "name": name
+        }
+
+    def get_parameters(self, query_params={}, headers={}, path_params={}):
+        parameters = []
+        for query_param in query_params:
+            parameters.append(
+                query_param,
+                query_params[query_param],
+                ParameterType.QUERY.value
+            )
+        for header in headers:
+            parameters.append(
+                header, headers[header], ParameterType.HEADERS.value
+            )
+        for path_param in path_params:
+            parameters.append(
+                path_param, path_params[path_param], ParameterType.PATH.value
+            )
+        return parameters
 
     def _get_type(self, data: Any) -> str:
         data_type = type(data)
