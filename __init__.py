@@ -19,6 +19,23 @@ class DocGen:
             }
         }
 
+    def get_request_schema(self, request):
+        request_data = {}
+        content_type = request.content_type
+        if content_type == OpenAPIContentTypes.JSON.value:
+            request_data = request.json
+        if content_type == OpenAPIContentTypes.FORM.value:
+            request_data = request.form
+        return {
+            "description": "TBA",
+            "required": True,
+            "content": {
+                (content_type): {
+                    "schema": self._get_data_schema(request_data)
+                }
+            }
+        }
+
     def get_response_content(self, response_data) -> object:
         return {
             "description": "TBA",
