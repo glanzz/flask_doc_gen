@@ -105,8 +105,8 @@ class DocGen:
         for header in headers:
             parameters.append(
                 self._get_parameter_object(
-                    header,
-                    headers[header],
+                    header[0],
+                    header[1],
                     ParameterType.HEADERS.value
                 )
             )
