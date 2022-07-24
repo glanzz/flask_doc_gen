@@ -15,19 +15,24 @@ class DocGen:
 
     def init_app(self, app):
         if (
-            'FLASK_DOC_GEN_ACTIVE' not in app.config
-            or not app.config['FLASK_DOC_GEN_ACTIVE']
+            "FLASK_DOC_GEN_ACTIVE" not in app.config
+            or not app.config["FLASK_DOC_GEN_ACTIVE"]
         ):
             warnings.warn(
-                'FlaskDocGen is initialized but it is not active, defaulting to false'
-                'Set FLASK_DOC_GEN_ACTIVE=True to activate'
+                "FlaskDocGen is initialized but it is not active,"
+                "defaulting to false"
+                "Set FLASK_DOC_GEN_ACTIVE=True to activate"
             )
 
-        app.config.setdefault('FLASK_DOC_GEN_ACTIVE', False)
-        app.config.setdefault('FLASK_DOC_GEN_BLACKLISTED_HEADERS', [])  # Not used currently
-        app.config.setdefault('FLASK_DOC_GEN_ENDPOINT_DESCRIPTIONS', [])  # Not used currently
+        app.config.setdefault("FLASK_DOC_GEN_ACTIVE", False)
+        app.config.setdefault(
+            "FLASK_DOC_GEN_BLACKLISTED_HEADERS", []
+        )  # Not used currently
+        app.config.setdefault(
+            "FLASK_DOC_GEN_ENDPOINT_DESCRIPTIONS", []
+        )  # Not used currently
 
-        app.extensions['flask_doc_gen'] = _FlaskDocGenState(self)
+        app.extensions["flask_doc_gen"] = _FlaskDocGenState(self)
 
     def get_response_schema(self, response):
         response_data = {}
@@ -39,9 +44,7 @@ class DocGen:
         return {
             (response.status_code): {
                 "description": "TBA",  # use from config when possible
-                "content": {
-                    (content_type): self.get_response_content(response_data)
-                },
+                "content": {(content_type): self.get_response_content(response_data)},
             }
         }
 
@@ -56,10 +59,8 @@ class DocGen:
             "description": "TBA",
             "required": True,
             "content": {
-                (content_type): {
-                    "schema": self._get_data_schema(request_data)
-                }
-            }
+                (content_type): {"schema": self._get_data_schema(request_data)}
+            },
         }
 
     def get_response_content(self, response_data) -> object:
@@ -95,17 +96,27 @@ class DocGen:
         parameters = []
         for query_param in query_params:
             parameters.append(
-                query_param,
-                query_params[query_param],
-                ParameterType.QUERY.value
+                self._get_parameter_object(
+                    query_param,
+                    query_params[query_param],
+                    ParameterType.QUERY.value
+                )
             )
         for header in headers:
             parameters.append(
-                header, headers[header], ParameterType.HEADERS.value
+                self._get_parameter_object(
+                    header,
+                    headers[header],
+                    ParameterType.HEADERS.value
+                )
             )
         for path_param in path_params:
             parameters.append(
-                path_param, path_params[path_param], ParameterType.PATH.value
+                self._get_parameter_object(
+                    path_param,
+                    path_params[path_param],
+                    ParameterType.PATH.value
+                )
             )
         return parameters
 
