@@ -1,8 +1,34 @@
+import warnings
 from typing import Any
 from .constants import OpenAPIContentTypes, OpenAPIDataTypes, ParameterType
 
 
+class _FlaskDocGenState:
+    def __init__(self, generator) -> None:
+        self.generator = generator
+
+
 class DocGen:
+    def __init__(self, app=None):
+        if app:
+            self.init_app(app)
+
+    def init_app(self, app):
+        if (
+            'FLASK_DOC_GEN_ACTIVE' not in app.config
+            or not app.config['FLASK_DOC_GEN_ACTIVE']
+        ):
+            warnings.warn(
+                'FlaskDocGen is initialized but it is not active, defaulting to false'
+                'Set FLASK_DOC_GEN_ACTIVE=True to activate'
+            )
+
+        app.config.setdefault('FLASK_DOC_GEN_ACTIVE', False)
+        app.config.setdefault('FLASK_DOC_GEN_BLACKLISTED_HEADERS', [])  # Not used currently
+        app.config.setdefault('FLASK_DOC_GEN_ENDPOINT_DESCRIPTIONS', [])  # Not used currently
+
+        app.extensions['flask_doc_gen'] = _FlaskDocGenState(self)
+
     def get_response_schema(self, response):
         response_data = {}
         content_type = response.content_type
