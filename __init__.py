@@ -1,6 +1,8 @@
 import warnings
+from json import dumps, load
 from typing import Any
 from .constants import OpenAPIContentTypes, OpenAPIDataTypes, ParameterType
+from flask import current_app
 
 
 class _FlaskDocGenState:
@@ -133,3 +135,57 @@ class DocGen:
         if data_type == bool:
             return OpenAPIDataTypes.boolean.name
         return ""
+
+    def generate(self, request, response):
+        if not current_app.config.get("FLASK_DOC_GEN_ACTIVE"):
+            return
+        document_json = {}
+
+        try:
+            json_file = open("document.json", "r")
+            document_json = load(json_file)
+            json_file.close()
+        except Exception as e:
+            warnings.warn(f"Failed to read data {str(e)}")
+
+        path_schema = document_json.get(request.path)
+        if path_schema:
+            warnings.warn(f"Path schema found for {request.path}")
+            request_method = request.method.lower()
+            if path_schema.get(request_method):
+                # Handle intelli param and response type manipulation
+                warnings.warn(f"Request method found for {request_method}")
+                warnings.warn("Nothing to update")
+            else:
+                warnings.warn(f"generating new request data for {request_method}")
+                path_schema[request_method] = self.get_request_method_schema(
+                    request, response
+                )
+        else:
+            warnings.warn(f"Generating new path data for {request.path}")
+            path_schema = self.get_path_schema(request, response)
+
+        # Redefine path schema
+        document_json[request.path] = path_schema
+
+        with open("document.json", "w") as json_file:
+            json_file.writelines(dumps(document_json))
+
+    def get_path_schema(self, request, response):
+        path_schema = {}
+        request_method = request.method.lower()
+        path_schema[request_method] = self.get_request_method_schema(
+            request, response
+        )
+        return path_schema
+
+    def get_request_method_schema(self, request, response):
+        return {
+            "parameters": self.get_parameters(
+                query_params=request.args,
+                headers=request.headers,
+                path_params=request.view_args,
+            ),  # add params optionally if it is there, also try sending the resposne code so that we can determine if the params should be added to doc
+            "requestBody": self.get_request_schema(request),
+            "responses": self.get_response_schema(response),
+        }
