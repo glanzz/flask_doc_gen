@@ -1,7 +1,14 @@
 import warnings
 from json import dumps, load
 from typing import Any
-from .constants import OpenAPIContentTypes, OpenAPIDataTypes, ParameterType
+from .constants import (
+    CONFIG_KEYS,
+    DEFAULT_GEN_FILE_NAME,
+    SCHEMA_KEYWORDS,
+    OpenAPIContentTypes,
+    OpenAPIDataTypes,
+    ParameterType,
+)
 from flask import current_app
 
 
@@ -25,45 +32,45 @@ class DocGen:
 
     def init_app(self, app):
         if (
-            "FLASK_DOC_GEN_ACTIVE" not in app.config
-            or not app.config["FLASK_DOC_GEN_ACTIVE"]
+            CONFIG_KEYS.ACTIVE.value not in app.config
+            or not app.config[CONFIG_KEYS.ACTIVE.value]
         ):
             warnings.warn(
                 "FlaskDocGen is initialized but it is not active,"
                 "defaulting to false"
                 "Set FLASK_DOC_GEN_ACTIVE=True to activate"
             )
-        if not app.config.get("FLASK_DOC_GEN_FILE"):
+        if not app.config.get(CONFIG_KEYS.FILE.value):
             warnings.warn(
                 "FlaskDocGen: No custom file name given initialized to "
                 "document.json in app root folder."
                 "Set FLASK_DOC_GEN_FILE='path/to/file'"
             )
         else:
-            json_file_name = app.config["FLASK_DOC_GEN_FILE"]
+            json_file_name = app.config[CONFIG_KEYS.FILE.value]
             if not self._is_valid_json_file_name(json_file_name):
-                app.config["FLASK_DOC_GEN_FILE"] = "document.json"
+                app.config[CONFIG_KEYS.FILE.value] = DEFAULT_GEN_FILE_NAME
                 warnings.warn(
                     "Invalid file name given, "
                     "defaulting to document.json"
                 )
 
-        app.config.setdefault("FLASK_DOC_GEN_ACTIVE", False)
-        app.config.setdefault("FLASK_DOC_GEN_FILE", 'document.json')
+        app.config.setdefault(CONFIG_KEYS.ACTIVE.value, False)
+        app.config.setdefault(CONFIG_KEYS.FILE.value, DEFAULT_GEN_FILE_NAME)
         app.config.setdefault(
-            "FLASK_DOC_GEN_BLACKLISTED_HEADERS", []
+            CONFIG_KEYS.BLACKLISTED_HEADERS.value, []
         )  # Not used currently
         app.config.setdefault(
-            "FLASK_DOC_GEN_ENDPOINT_DESCRIPTIONS", []
+            CONFIG_KEYS.DESCRIPTIONS.value, []
         )  # Not used currently
 
         app.extensions["flask_doc_gen"] = _FlaskDocGenState(self)
 
     def generate(self, request, response):
-        if not current_app.config.get("FLASK_DOC_GEN_ACTIVE"):
+        if not current_app.config.get(CONFIG_KEYS.ACTIVE.value):
             return
         document_json = {}
-        file_name = current_app.config["FLASK_DOC_GEN_FILE"]
+        file_name = current_app.config[CONFIG_KEYS.FILE.value]
 
         try:
             json_file = open(file_name, "r")
@@ -101,20 +108,33 @@ class DocGen:
                 query_params=request.args,
                 headers=request.headers,
                 path_params=request.view_args,
-                current_schema=current_schema.get("parameters", []),
+                current_schema=current_schema.get(
+                    SCHEMA_KEYWORDS.PARAMETERS.value, []
+                ),
             )
             request_body_schema = self.get_request_schema(
-                request, current_schema=current_schema.get("requestBody", {})
+                request,
+                current_schema=current_schema.get(
+                    SCHEMA_KEYWORDS.REQUEST_BODY.value, {}
+                )
             )
 
         request_method_schema = current_schema if current_schema else {}
         if parameters_schema:
-            request_method_schema["parameters"] = parameters_schema
+            request_method_schema[
+                SCHEMA_KEYWORDS.PARAMETERS.value
+            ] = parameters_schema
         if request_body_schema:
-            request_method_schema["requestBody"] = request_body_schema
+            request_method_schema[
+                SCHEMA_KEYWORDS.REQUEST_BODY.value
+            ] = request_body_schema
 
-        request_method_schema["responses"] = self.get_response_schema(
-            response, current_schema=current_schema.get("responses", {})
+        request_method_schema[
+            SCHEMA_KEYWORDS.RESPONSES.value
+        ] = self.get_response_schema(
+            response, current_schema=current_schema.get(
+                SCHEMA_KEYWORDS.RESPONSES.value, {}
+            )
         )
 
         return request_method_schema
@@ -137,9 +157,9 @@ class DocGen:
             }
         else:
             response_schema[response_code] = self._get_content_schema(
+                current_schema=response_schema[response_code],
                 content_type=content_type,
                 data=response_data,
-                current_schema=response_schema[response_code],
             )
 
         return response_schema
