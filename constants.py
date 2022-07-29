@@ -21,3 +21,16 @@ class ParameterType(Enum):
 
 
 DEFAULT_GEN_FILE_NAME = "document.json"
+
+
+class SCHEMA_KEYWORDS(Enum):
+    PARAMETERS = "parameters"
+    REQUEST_BODY = "requestBody"
+    RESPONSES = "responses"
+
+
+class CONFIG_KEYS(Enum):
+    ACTIVE = "FLASK_DOC_GEN_ACTIVE"
+    FILE = "FLASK_DOC_GEN_FILE"
+    BLACKLISTED_HEADERS = "FLASK_DOC_GEN_BLACKLISTED_HEADERS"
+    DESCRIPTIONS = "FLASK_DOC_GEN_ENDPOINT_DESCRIPTIONS"
