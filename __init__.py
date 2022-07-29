@@ -79,14 +79,27 @@ class DocGen:
         except Exception as e:
             warnings.warn(f"Failed to read data {str(e)}")
 
-        path_schema = document_json.get(request.path, {})
+        request_path = self._get_request_path(
+            path=request.path, view_args=request.view_args
+        )
+        path_schema = document_json.get(request_path, {})
         path_schema = self.get_path_schema(
             request=request, response=response, current_schema=path_schema
         )
-        document_json[request.path] = path_schema
+        document_json[request_path] = path_schema
 
         with open(file_name, "w") as json_file:
             json_file.writelines(dumps(document_json))
+
+    def _get_request_path(cls, path, view_args):
+        if not view_args:
+            return path
+        request_path = path
+        for arg in view_args:
+            request_path = request_path.replace(
+                view_args[arg], '{'+f'{arg}'+'}', 1
+            )  # Only one occurance per view arg
+        return request_path
 
     def get_path_schema(self, request, response, current_schema={}):
         path_schema = current_schema if current_schema else {}
