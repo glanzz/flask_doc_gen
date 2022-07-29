@@ -15,6 +15,14 @@ class DocGen:
         if app:
             self.init_app(app)
 
+    def _is_valid_json_file_name(cls, file_name):
+        valid_file_name = True
+        if not type(file_name) == str:
+            valid_file_name = False
+        elif file_name.endswith(".json"):
+            valid_file_name = False
+        return valid_file_name
+
     def init_app(self, app):
         if (
             "FLASK_DOC_GEN_ACTIVE" not in app.config
@@ -25,8 +33,23 @@ class DocGen:
                 "defaulting to false"
                 "Set FLASK_DOC_GEN_ACTIVE=True to activate"
             )
+        if not app.config.get("FLASK_DOC_GEN_FILE"):
+            warnings.warn(
+                "FlaskDocGen: No custom file name given initialized to "
+                "document.json in app root folder."
+                "Set FLASK_DOC_GEN_FILE='path/to/file'"
+            )
+        else:
+            json_file_name = app.config["FLASK_DOC_GEN_FILE"]
+            if not self._is_valid_json_file_name(json_file_name):
+                app.config["FLASK_DOC_GEN_FILE"] = "document.json"
+                warnings.warn(
+                    "Invalid file name given, "
+                    "defaulting to document.json"
+                )
 
         app.config.setdefault("FLASK_DOC_GEN_ACTIVE", False)
+        app.config.setdefault("FLASK_DOC_GEN_FILE", 'document.json')
         app.config.setdefault(
             "FLASK_DOC_GEN_BLACKLISTED_HEADERS", []
         )  # Not used currently
@@ -40,9 +63,10 @@ class DocGen:
         if not current_app.config.get("FLASK_DOC_GEN_ACTIVE"):
             return
         document_json = {}
+        file_name = current_app.config["FLASK_DOC_GEN_FILE"]
 
         try:
-            json_file = open("document.json", "r")
+            json_file = open(file_name, "r")
             document_json = load(json_file)
             json_file.close()
         except Exception as e:
@@ -54,7 +78,7 @@ class DocGen:
         )
         document_json[request.path] = path_schema
 
-        with open("document.json", "w") as json_file:
+        with open(file_name, "w") as json_file:
             json_file.writelines(dumps(document_json))
 
     def get_path_schema(self, request, response, current_schema={}):
