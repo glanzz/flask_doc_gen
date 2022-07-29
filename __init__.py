@@ -1,7 +1,12 @@
 import warnings
 from json import dumps, load
 from typing import Any
-from .constants import DEFAULT_GEN_FILE_NAME, OpenAPIContentTypes, OpenAPIDataTypes, ParameterType
+from .constants import (
+    DEFAULT_GEN_FILE_NAME,
+    OpenAPIContentTypes,
+    OpenAPIDataTypes,
+    ParameterType,
+)
 from flask import current_app
 
 

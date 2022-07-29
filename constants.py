@@ -20,4 +20,4 @@ class ParameterType(Enum):
     PATH = "path"
 
 
-DEFAULT_GEN_FILE_NAME = 'document.json'
+DEFAULT_GEN_FILE_NAME = "document.json"
