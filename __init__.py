@@ -1,7 +1,7 @@
 import warnings
 from json import dumps, load
 from typing import Any
-from .constants import OpenAPIContentTypes, OpenAPIDataTypes, ParameterType
+from .constants import DEFAULT_GEN_FILE_NAME, OpenAPIContentTypes, OpenAPIDataTypes, ParameterType
 from flask import current_app
 
 
@@ -42,14 +42,14 @@ class DocGen:
         else:
             json_file_name = app.config["FLASK_DOC_GEN_FILE"]
             if not self._is_valid_json_file_name(json_file_name):
-                app.config["FLASK_DOC_GEN_FILE"] = "document.json"
+                app.config["FLASK_DOC_GEN_FILE"] = DEFAULT_GEN_FILE_NAME
                 warnings.warn(
                     "Invalid file name given, "
                     "defaulting to document.json"
                 )
 
         app.config.setdefault("FLASK_DOC_GEN_ACTIVE", False)
-        app.config.setdefault("FLASK_DOC_GEN_FILE", 'document.json')
+        app.config.setdefault("FLASK_DOC_GEN_FILE", DEFAULT_GEN_FILE_NAME)
         app.config.setdefault(
             "FLASK_DOC_GEN_BLACKLISTED_HEADERS", []
         )  # Not used currently

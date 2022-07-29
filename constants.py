@@ -18,3 +18,6 @@ class ParameterType(Enum):
     HEADERS = "header"
     QUERY = "query"
     PATH = "path"
+
+
+DEFAULT_GEN_FILE_NAME = 'document.json'
