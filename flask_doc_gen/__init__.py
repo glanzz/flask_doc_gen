@@ -26,7 +26,7 @@ class DocGen:
         valid_file_name = True
         if not type(file_name) == str:
             valid_file_name = False
-        elif file_name.endswith(".json"):
+        elif not file_name.endswith(".json"):
             valid_file_name = False
         return valid_file_name
 
