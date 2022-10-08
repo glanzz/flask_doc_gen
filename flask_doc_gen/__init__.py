@@ -18,9 +18,32 @@ class _FlaskDocGenState:
 
 
 class DocGen:
-    def __init__(self, app=None):
+    def __init__(self, title, description='', servers=[], app=None):
         if app:
             self.init_app(app)
+        self.title = title
+        self._validate_description(description)
+        self._validate_servers(servers)
+    
+    def _validate_description(self, value):
+        if not value:
+            return
+
+        if type(value) != str:
+            raise Exception("Invalid description given")
+        else:
+            self.description = value
+    
+    def _validate_servers(self, servers):
+        if not servers:
+            return
+        if type(servers) != list:
+            raise Exception("Invalid server value given, Expected format: [{'url': 'https://github.com', description: 'Production URL for sample app'}]")
+
+        for server in servers:
+            if "url" not in server:
+                raise Exception("URL is required inside server specification")
+        self.servers = servers
 
     def _is_valid_json_file_name(cls, file_name):
         valid_file_name = True
@@ -79,14 +102,29 @@ class DocGen:
         except Exception as e:
             warnings.warn(f"Failed to read data {str(e)}")
 
+        if document_json.get("openapi"):
+            document_json["openapi"] = "3.0.0"
+        if not document_json.get("info"):
+            document_json["info"] = {
+                "title": self.title,
+            }
+            if self.description:
+                document_json["info"]["description"] = self.description
+            if self.servers:
+                document_json["servers"] = self.servers
+
+        paths = document_json.get("paths", {})
+
         request_path = self._get_request_path(
             path=request.path, view_args=request.view_args
         )
-        path_schema = document_json.get(request_path, {})
+        path_schema = paths.get(request_path, {})
         path_schema = self.get_path_schema(
             request=request, response=response, current_schema=path_schema
         )
-        document_json[request_path] = path_schema
+        paths[request_path] = path_schema
+
+        document_json["paths"] = paths
 
         with open(file_name, "w") as json_file:
             json_file.writelines(dumps(document_json))
