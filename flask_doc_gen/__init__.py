@@ -289,7 +289,7 @@ class DocGen:
 
         blacklisted_headers = current_app.config.get(CONFIG_KEYS.BLACKLISTED_HEADERS.value)
         for header in headers:
-            if header[0] not in existing_params and header[0] != CONTENT_TYPE_HEADER_NAME and header[0].lower() not in blacklisted_headers:
+            if header[0] not in existing_params and header[0] != CONTENT_TYPE_HEADER_NAME and header[0].upper() not in blacklisted_headers:
                 parameters.append(
                     self._get_parameter_object(
                         header[0], header[1], ParameterType.HEADERS.value
