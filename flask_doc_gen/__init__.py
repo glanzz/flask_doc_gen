@@ -206,7 +206,6 @@ class DocGen:
         response_code = str(response.status_code)
         if response_code not in response_schema:
             response_schema[response_code] = {
-                "description": "TBA",  # use from config when possible
                 "content": {
                     (content_type): self.get_response_content(response_data)
                 },
