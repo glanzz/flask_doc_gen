@@ -22,9 +22,9 @@ class DocGen:
         if app:
             self.init_app(app)
         self.title = title
+        self.version = version
         self._validate_description(description)
         self._validate_servers(servers)
-        self.version = version
     
     def _validate_description(self, value):
         if not value:
@@ -105,7 +105,7 @@ class DocGen:
         except Exception as e:
             warnings.warn(f"Failed to read data {str(e)}")
 
-        if document_json.get("openapi"):
+        if not document_json.get("openapi"):
             document_json["openapi"] = "3.0.0"
         if not document_json.get("info"):
             document_json["info"] = {
