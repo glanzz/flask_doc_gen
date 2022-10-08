@@ -206,6 +206,7 @@ class DocGen:
         response_code = str(response.status_code)
         if response_code not in response_schema:
             response_schema[response_code] = {
+                "description": "TBA",
                 "content": {
                     (content_type): self.get_response_content(response_data)
                 },
@@ -221,7 +222,6 @@ class DocGen:
 
     def get_response_content(self, response_data) -> object:
         return {
-            "description": "TBA",
             "schema": self._get_data_schema(response_data)
         }
 
