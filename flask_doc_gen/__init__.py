@@ -27,6 +27,7 @@ class DocGen:
     
     def _validate_description(self, value):
         if not value:
+            self.description = None
             return
 
         if type(value) != str:
@@ -36,6 +37,7 @@ class DocGen:
     
     def _validate_servers(self, servers):
         if not servers:
+            self.servers = None
             return
         if type(servers) != list:
             raise Exception("Invalid server value given, Expected format: [{'url': 'https://github.com', description: 'Production URL for sample app'}]")
