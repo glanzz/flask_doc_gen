@@ -18,12 +18,13 @@ class _FlaskDocGenState:
 
 
 class DocGen:
-    def __init__(self, title, description='', servers=[], app=None):
+    def __init__(self, title, version="1.0.0", description='', servers=[], app=None):
         if app:
             self.init_app(app)
         self.title = title
         self._validate_description(description)
         self._validate_servers(servers)
+        self.version = version
     
     def _validate_description(self, value):
         if not value:
@@ -109,6 +110,7 @@ class DocGen:
         if not document_json.get("info"):
             document_json["info"] = {
                 "title": self.title,
+                "version": self.version
             }
             if self.description:
                 document_json["info"]["description"] = self.description
