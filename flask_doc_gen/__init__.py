@@ -302,6 +302,7 @@ class DocGen:
                         param_type=ParameterType.PATH.value,
                         value=path_params[path_param],
                         name=path_param,
+                        required=True
                     )
                 )
         return parameters
@@ -312,8 +313,9 @@ class DocGen:
             "schema": self._get_data_schema(value),
             "in": param_type,
         }
-        """if required is not None:
-            param_object["required"] = required"""
+        if required is not None:
+            param_object["required"] = required
+
         return param_object
 
     def _get_data_schema(self, value, current_schema=None):
