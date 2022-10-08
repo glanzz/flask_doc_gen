@@ -3,6 +3,7 @@ from json import dumps, load
 from typing import Any
 from .constants import (
     CONFIG_KEYS,
+    CONTENT_TYPE_HEADER_NAME,
     DEFAULT_GEN_FILE_NAME,
     SCHEMA_KEYWORDS,
     OpenAPIContentTypes,
@@ -18,15 +19,17 @@ class _FlaskDocGenState:
 
 
 class DocGen:
-    def __init__(self, title, description='', servers=[], app=None):
+    def __init__(self, title, version="1.0.0", description='', servers=[], app=None):
         if app:
             self.init_app(app)
         self.title = title
+        self.version = version
         self._validate_description(description)
         self._validate_servers(servers)
     
     def _validate_description(self, value):
         if not value:
+            self.description = None
             return
 
         if type(value) != str:
@@ -36,6 +39,7 @@ class DocGen:
     
     def _validate_servers(self, servers):
         if not servers:
+            self.servers = None
             return
         if type(servers) != list:
             raise Exception("Invalid server value given, Expected format: [{'url': 'https://github.com', description: 'Production URL for sample app'}]")
@@ -102,11 +106,12 @@ class DocGen:
         except Exception as e:
             warnings.warn(f"Failed to read data {str(e)}")
 
-        if document_json.get("openapi"):
+        if not document_json.get("openapi"):
             document_json["openapi"] = "3.0.0"
         if not document_json.get("info"):
             document_json["info"] = {
                 "title": self.title,
+                "version": self.version
             }
             if self.description:
                 document_json["info"]["description"] = self.description
@@ -201,7 +206,6 @@ class DocGen:
         response_code = str(response.status_code)
         if response_code not in response_schema:
             response_schema[response_code] = {
-                "description": "TBA",  # use from config when possible
                 "content": {
                     (content_type): self.get_response_content(response_data)
                 },
@@ -283,7 +287,7 @@ class DocGen:
                     )
                 )
         for header in headers:
-            if header[0] not in existing_params:
+            if header[0] not in existing_params and header[0] != CONTENT_TYPE_HEADER_NAME:
                 parameters.append(
                     self._get_parameter_object(
                         header[0], header[1], ParameterType.HEADERS.value
