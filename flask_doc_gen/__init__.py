@@ -26,6 +26,9 @@ class DocGen:
         self._validate_servers(servers)
     
     def _validate_description(self, value):
+        if not value:
+            return
+
         if type(value) != str:
             raise Exception("Invalid description given")
         else:
