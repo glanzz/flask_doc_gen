@@ -3,6 +3,7 @@ from json import dumps, load
 from typing import Any
 from .constants import (
     CONFIG_KEYS,
+    CONTENT_TYPE_HEADER_NAME,
     DEFAULT_GEN_FILE_NAME,
     SCHEMA_KEYWORDS,
     OpenAPIContentTypes,
@@ -287,7 +288,7 @@ class DocGen:
                     )
                 )
         for header in headers:
-            if header[0] not in existing_params:
+            if header[0] not in existing_params and header[0] != CONTENT_TYPE_HEADER_NAME:
                 parameters.append(
                     self._get_parameter_object(
                         header[0], header[1], ParameterType.HEADERS.value
