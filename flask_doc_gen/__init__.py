@@ -193,6 +193,8 @@ class DocGen:
             )
         )
 
+        request_method_schema["tags"] = [request.blueprint if request.blueprint else request.script_root[1:]]
+
         return request_method_schema
 
     def get_response_schema(self, response, current_schema={}):
