@@ -218,8 +218,10 @@ class DocGen:
                 SCHEMA_KEYWORDS.RESPONSES.value, {}
             )
         )
-
-        request_method_schema["tags"] = [request.blueprint if request.blueprint else request.script_root[1:]]
+        if self.tags:
+            tag_key = request.full_path.split("/")[1]
+            if tag_key in self.tags.keys():
+                request_method_schema["tags"] = [self.tags[tag_key]["name"]]
 
         return request_method_schema
 
