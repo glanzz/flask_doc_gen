@@ -19,13 +19,36 @@ class _FlaskDocGenState:
 
 
 class DocGen:
-    def __init__(self, title, version="1.0.0", description='', servers=[], app=None):
+    def __init__(self, title, version="1.0.0", description='', servers=[], tags=[], app=None):
         if app:
             self.init_app(app)
         self.title = title
         self.version = version
         self._validate_description(description)
         self._validate_servers(servers)
+        self._validate_tags(tags)
+    
+    def _validate_tags(self, tags):
+        if not tags:
+            self.tags = None
+            return
+        if type(tags) != list:
+            raise Exception("Invalid tags value given, Expected format: [{'name': 'Pets', description: 'APIs to access the pet resource', 'match': 'pets'}]")
+
+        tags_dict = {}
+        for tag in tags:
+            if "name" not in tag:
+                raise Exception("Tag name is required")
+            if "description" not in tag:
+                raise Exception("Tag description is required")
+            if "match" not in tag:
+                raise Exception("Specify the exact match of the route prefix to which the tag is to be applied")
+            tags_dict[tag["match"]] = {
+                "name": tag["name"],
+                "description": tag["description"],
+            }
+        self.tags = tags_dict
+
     
     def _validate_description(self, value):
         if not value:
@@ -117,6 +140,9 @@ class DocGen:
                 document_json["info"]["description"] = self.description
             if self.servers:
                 document_json["servers"] = self.servers
+        if not document_json.get("tags"):
+            if self.tags:
+                document_json["tags"] = list(self.tags.values())
 
         paths = document_json.get("paths", {})
 
@@ -192,6 +218,10 @@ class DocGen:
                 SCHEMA_KEYWORDS.RESPONSES.value, {}
             )
         )
+        if self.tags:
+            tag_key = request.full_path.split("/")[1]
+            if tag_key in self.tags.keys():
+                request_method_schema["tags"] = [self.tags[tag_key]["name"]]
 
         return request_method_schema
 
