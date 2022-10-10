@@ -140,6 +140,9 @@ class DocGen:
                 document_json["info"]["description"] = self.description
             if self.servers:
                 document_json["servers"] = self.servers
+        if not document_json.get("tags"):
+            if self.tags:
+                document_json["tags"] = list(self.tags.values())
 
         paths = document_json.get("paths", {})
 
