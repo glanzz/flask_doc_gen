@@ -19,11 +19,11 @@ class _FlaskDocGenState:
 
 
 class DocGen:
-    def __init__(self, title, version="1.0.0", description='', servers=[], tags=[], app=None):
+    def __init__(self, title:str, version:str="1.0.0", description:str='', servers:list=[], tags:list=[], app=None) -> None:
         if app:
             self.init_app(app)
-        self.title = title
-        self.version = version
+        self.title: str = title
+        self.version: str = version
         self._validate_description(description)
         self._validate_servers(servers)
         self._validate_tags(tags)
