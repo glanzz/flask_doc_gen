@@ -168,7 +168,7 @@ class DocGen:
         request_path = path
         for arg in view_args:
             request_path = request_path.replace(
-                view_args[arg], '{'+f'{arg}'+'}', 1
+                str(view_args[arg]), '{'+f'{arg}'+'}', 1
             )  # Only one occurance per view arg
         return request_path
 
