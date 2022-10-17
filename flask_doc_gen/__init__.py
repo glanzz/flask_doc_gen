@@ -5,6 +5,7 @@ from .constants import (
     CONFIG_KEYS,
     CONTENT_TYPE_HEADER_NAME,
     DEFAULT_GEN_FILE_NAME,
+    REQUEST_BODY_UNALLOWED_METHODS,
     SCHEMA_KEYWORDS,
     OpenAPIContentTypes,
     OpenAPIDataTypes,
@@ -167,7 +168,7 @@ class DocGen:
         request_path = path
         for arg in view_args:
             request_path = request_path.replace(
-                view_args[arg], '{'+f'{arg}'+'}', 1
+                str(view_args[arg]), '{'+f'{arg}'+'}', 1
             )  # Only one occurance per view arg
         return request_path
 
@@ -184,7 +185,13 @@ class DocGen:
 
     def get_request_method_schema(self, request, response, current_schema={}):
         SUCCESS_RESPONSE = response.status_code == 200
-        parameters_schema = []
+        ADD_REQUEST_BODY = request.method.upper() not in REQUEST_BODY_UNALLOWED_METHODS
+        parameters_schema = self.get_parameters(
+            path_params=request.view_args,
+            current_schema=current_schema.get(
+                SCHEMA_KEYWORDS.PARAMETERS.value, []
+            )
+        )
         request_body_schema = {}
         if SUCCESS_RESPONSE:
             parameters_schema = self.get_parameters(
@@ -195,12 +202,13 @@ class DocGen:
                     SCHEMA_KEYWORDS.PARAMETERS.value, []
                 ),
             )
-            request_body_schema = self.get_request_schema(
-                request,
-                current_schema=current_schema.get(
-                    SCHEMA_KEYWORDS.REQUEST_BODY.value, {}
+            if ADD_REQUEST_BODY:
+                request_body_schema = self.get_request_schema(
+                    request,
+                    current_schema=current_schema.get(
+                        SCHEMA_KEYWORDS.REQUEST_BODY.value, {}
+                    )
                 )
-            )
 
         request_method_schema = current_schema if current_schema else {}
         if parameters_schema:
@@ -228,6 +236,7 @@ class DocGen:
 
     def get_response_schema(self, response, current_schema={}):
         response_schema = current_schema if current_schema else {}
+        response_data = ""
         content_type = response.content_type
         if content_type == OpenAPIContentTypes.JSON.value:
             response_data = response.json
@@ -263,6 +272,7 @@ class DocGen:
             else {"description": "TBA", "required": True, "content": {}}
         )
 
+        request_data = {}
         content_type = request.content_type
         if content_type == OpenAPIContentTypes.JSON.value:
             request_data = request.json
@@ -367,10 +377,10 @@ class DocGen:
                 )
             return schema
         elif value_type == OpenAPIDataTypes.array.name:
+            schema["items"] = current_schema.get("items", {}) if type_match else {}
             if len(value):
-                schema["items"] = current_schema["items"] if type_match else {}
                 schema["items"] = self._get_data_schema(
-                    value[0], current_schema=current_schema.get("items")
+                    value[0], current_schema=schema["items"]
                 )
 
         return schema
@@ -387,4 +397,4 @@ class DocGen:
             return OpenAPIDataTypes.array.name
         if data_type == bool:
             return OpenAPIDataTypes.boolean.name
-        return ""
+        return OpenAPIDataTypes.string.name
