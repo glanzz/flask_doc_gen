@@ -263,6 +263,7 @@ class DocGen:
             else {"description": "TBA", "required": True, "content": {}}
         )
 
+        request_data = {}
         content_type = request.content_type
         if content_type == OpenAPIContentTypes.JSON.value:
             request_data = request.json
