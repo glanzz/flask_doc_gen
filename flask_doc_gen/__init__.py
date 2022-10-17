@@ -367,10 +367,10 @@ class DocGen:
                 )
             return schema
         elif value_type == OpenAPIDataTypes.array.name:
+            schema["items"] = current_schema.get("items", {}) if type_match else {}
             if len(value):
-                schema["items"] = current_schema["items"] if type_match else {}
                 schema["items"] = self._get_data_schema(
-                    value[0], current_schema=current_schema.get("items")
+                    value[0], current_schema=schema["items"]
                 )
 
         return schema
