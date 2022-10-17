@@ -387,4 +387,4 @@ class DocGen:
             return OpenAPIDataTypes.array.name
         if data_type == bool:
             return OpenAPIDataTypes.boolean.name
-        return ""
+        return OpenAPIDataTypes.string.name
