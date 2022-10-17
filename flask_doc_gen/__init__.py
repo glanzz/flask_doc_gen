@@ -228,6 +228,7 @@ class DocGen:
 
     def get_response_schema(self, response, current_schema={}):
         response_schema = current_schema if current_schema else {}
+        response_data = ""
         content_type = response.content_type
         if content_type == OpenAPIContentTypes.JSON.value:
             response_data = response.json
