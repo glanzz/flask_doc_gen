@@ -5,6 +5,7 @@ from .constants import (
     CONFIG_KEYS,
     CONTENT_TYPE_HEADER_NAME,
     DEFAULT_GEN_FILE_NAME,
+    REQUEST_BODY_UNALLOWED_METHODS,
     SCHEMA_KEYWORDS,
     OpenAPIContentTypes,
     OpenAPIDataTypes,
@@ -184,7 +185,13 @@ class DocGen:
 
     def get_request_method_schema(self, request, response, current_schema={}):
         SUCCESS_RESPONSE = response.status_code == 200
-        parameters_schema = []
+        ADD_REQUEST_BODY = request.method.upper() not in REQUEST_BODY_UNALLOWED_METHODS
+        parameters_schema = self.get_parameters(
+            path_params=request.view_args,
+            current_schema=current_schema.get(
+                SCHEMA_KEYWORDS.PARAMETERS.value, []
+            )
+        )
         request_body_schema = {}
         if SUCCESS_RESPONSE:
             parameters_schema = self.get_parameters(
@@ -195,12 +202,13 @@ class DocGen:
                     SCHEMA_KEYWORDS.PARAMETERS.value, []
                 ),
             )
-            request_body_schema = self.get_request_schema(
-                request,
-                current_schema=current_schema.get(
-                    SCHEMA_KEYWORDS.REQUEST_BODY.value, {}
+            if ADD_REQUEST_BODY:
+                request_body_schema = self.get_request_schema(
+                    request,
+                    current_schema=current_schema.get(
+                        SCHEMA_KEYWORDS.REQUEST_BODY.value, {}
+                    )
                 )
-            )
 
         request_method_schema = current_schema if current_schema else {}
         if parameters_schema:
