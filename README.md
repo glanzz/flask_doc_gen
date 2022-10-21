@@ -1,5 +1,11 @@
 # Flask Document Generator
-Generate Open API Documentation for your flask applications by just increasing your code testing coverage 
+Flask Doc Gen is a simple flask extension which allows you to generate Open API Documentation for your flask applications by just increasing your code testing coverage 
+
+## Installation
+Install Flask Document Generator with pip by running the below command:
+```
+pip3 install git+https://github.com/bhargavcn/flask_doc_gen.git
+```
 
 ## Getting Started
 Initialize a document generator instance
@@ -22,8 +28,3 @@ doc_gen = DocGen(
 
 ```
 
-## Installation
-Install Flask Document Generator with pip by running the below command:
-```
-pip3 install git+https://github.com/bhargavcn/flask_doc_gen.git
-```
