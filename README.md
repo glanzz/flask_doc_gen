@@ -28,3 +28,7 @@ doc_gen = DocGen(
 
 ```
 
+Initalize the document generator instance with the flask app
+```python
+doc_gen.init_app(app)
+```
