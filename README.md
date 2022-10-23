@@ -32,3 +32,11 @@ Initalize the document generator instance with the flask app
 ```python
 doc_gen.init_app(app)
 ```
+
+Pass the request and response object to the generate function in the flask after request handler
+```python
+@app.after_request
+def before_request_handler(response):
+    doc_gen.generate(request, response)
+    return response
+```
