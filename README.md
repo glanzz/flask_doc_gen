@@ -40,3 +40,10 @@ def before_request_handler(response):
     doc_gen.generate(request, response)
     return response
 ```
+
+Enable the document generator in the app's configuration
+```
+FLASK_DOC_GEN_ACTIVE=True
+```
+
+Run the test cases and watch the document generated for your application.
