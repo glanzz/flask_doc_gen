@@ -35,8 +35,9 @@ doc_gen.init_app(app)
 
 Pass the request and response object to the generate function in the flask after request handler
 ```python
+from flask import request
 @app.after_request
-def before_request_handler(response):
+def after_request_handler(response):
     doc_gen.generate(request, response)
     return response
 ```
