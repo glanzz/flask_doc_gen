@@ -53,3 +53,7 @@ NOTE: Make sure you return the response object in the after request handler(This
 ## Limitations
 - Use of the flask request handler is optional and required only if you want to automate the generation
 - The document generation requires the test cases to have used test_request_client of the pytest functionality so that the after_request handler of the flask is called.
+
+## Document Generator Options
+Check github wiki for more details
+
