@@ -49,11 +49,3 @@ FLASK_DOC_GEN_ACTIVE=True
 
 Run the test cases and watch the document generated for your application.
 NOTE: Make sure you return the response object in the after request handler(This is required as per flask)
-
-## Limitations
-- Use of the flask request handler is optional and required only if you want to automate the generation
-- The document generation requires the test cases to have used test_request_client of the pytest functionality so that the after_request handler of the flask is called.
-
-## Document Generator Options
-Check github wiki for more details
-
